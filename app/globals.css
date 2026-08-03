@@ -1,0 +1,9 @@
+@import "./legacy.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --creator-ink: #0c0c0c;
+  --creator-frost: #d7e2ea;
+}

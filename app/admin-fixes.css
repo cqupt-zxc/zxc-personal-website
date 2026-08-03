@@ -1,0 +1,29 @@
+.private-gate form:first-of-type {
+  display: grid;
+  max-width: 640px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 28px;
+  border-bottom: 0;
+}
+
+.private-gate form:first-of-type input {
+  min-width: 0;
+  border-bottom: 1px solid var(--ink);
+}
+
+.private-gate form:first-of-type button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .private-gate form:first-of-type {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .private-gate form:first-of-type button {
+    grid-column: 1;
+  }
+}
