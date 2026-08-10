@@ -1,6 +1,6 @@
 # Project handoff and baseline audit
 
-**Last updated**: 2026-08-10 (baseline audit at commit `71e1625`).
+**Last updated**: 2026-08-10 (baseline audit at commit `71e1625`; Phase 0A RLS design finalized locally, with no migration applied).
 **Repository**: `https://github.com/cqupt-zxc/zxc-personal-website`.
 **Status**: production build succeeds without service configuration, but production deployment is blocked by the P0 items below.
 
@@ -77,6 +77,8 @@ Local-only screenshots from this audit are stored under `audit/baseline-2026-08-
 - **Recommended fix**: Replace the permissive policy with database-enforced admin authorization. Prefer an immutable `app_metadata` custom claim/RBAC policy or a dedicated admin table keyed by `auth.uid()`. Restrict operations to the minimum needed (`SELECT` public; admin-only `INSERT`/`UPDATE`; normally no client `DELETE`). Disable open signup or make authentication invite-only if only maintainers should have accounts.
 - **Modification risk**: High. A bad policy can lock out the editor or remain permissive. Apply in a non-production Supabase project first and include rollback SQL.
 - **Verification**: With two test users, prove the allowlisted admin can update row `id = 1` and a normal authenticated user receives an RLS denial through the direct Data API. Also prove anonymous public reads still work.
+- **Phase 0A design status (2026-08-10)**: A design-only review on local branch `security/phase-0a-rls` finalizes non-API schema `app_private`, containing `app_private.admin_users(user_id uuid)` and a hardened `app_private.is_site_admin()` `SECURITY DEFINER` helper. The target policy set is public `SELECT`, admin-only `INSERT`/`UPDATE`, and no `DELETE`; `site_content` grants will be reset explicitly rather than inherited. The schema/table/function preflight must fail closed on unknown state. No SQL migration, dashboard change, admin seed, commit, or push has been performed.
+- **Bootstrap prerequisite (unresolved)**: Before any real bootstrap, manually inspect Supabase Auth and confirm the canonical UUID or UUIDs for the intended Email and GitHub identities, whether identities are linked, and which exact UID(s) receive membership. Do not derive membership dynamically from an email match. No real UID is recorded here.
 
 ### P0-2 — GitHub OAuth setup instructions conflate two callbacks
 
