@@ -1,6 +1,6 @@
 # Project handoff and baseline audit
 
-**Last updated**: 2026-08-11 (audited application baseline commit `71e1625`; Phase 0C disposable migration/catalog/privilege verification completed, while real actor verification remains pending).
+**Last updated**: 2026-08-11 (Phase 0C disposable migration/catalog/privilege verification completed while real actor verification remains pending; Phase 0E-2A environment validation core completed).
 **Repository**: `https://github.com/cqupt-zxc/zxc-personal-website`.
 **Status**: production build succeeds without service configuration, but production deployment is blocked by the P0 items below.
 
@@ -107,6 +107,7 @@ Local-only screenshots from this audit are stored under `audit/baseline-2026-08-
 - **Recommended fix**: Add server-only environment parsing with clear required/optional groups, a controlled unavailable state for admin/private features, consistent local origin handling, and a pre-launch content checklist. Keep service-role, private password, and GitHub token variables server-only.
 - **Modification risk**: Medium. Making every variable mandatory could prevent useful demo builds; separate public fallback mode from production mode.
 - **Verification**: Test three matrices: no-service demo, valid preview services, and production configuration. Each should have explicit expected routes, metadata origins, and failure messages.
+- **Phase 0E-2A repository status (2026-08-11)**: Added public environment parsing for canonical site origins and optional/required public Supabase configuration, plus a `server-only` module for parsed admin allowlists, private-archive configuration, and optional GitHub enrichment configuration. `app/layout.tsx`, `lib/content.ts`, and `lib/supabase/server.ts` now use the public validation layer; this preserves the no-service public demo fallback, rejects partial Supabase configuration, and replaces the server client’s environment non-null assertions. The 22 environment tests pass, as do the full 41-test suite, TypeScript, and production build. Route-level controlled unavailable states, private/admin/auth/GitHub call-site integration, and the production-specific build gate remain Phase 0E-2B work. **P0-4 remains open and is not production-ready.**
 
 ## P1 — correctness and reliability
 
@@ -364,4 +365,4 @@ Phase 0D repository documentation is complete, but no provider or deployment das
 
 ---
 
-*Created 2026-08-10. Revised 2026-08-11 (Phase 0C disposable RLS verification status and Phase 0D OAuth documentation status). Revise the date and verified-baseline facts whenever dependencies, deployment configuration, or security posture changes.*
+*Created 2026-08-10. Revised 2026-08-11 (Phase 0C disposable RLS verification status, Phase 0D OAuth documentation status, and Phase 0E-2A environment validation core). Revise the date and verified-baseline facts whenever dependencies, deployment configuration, or security posture changes.*

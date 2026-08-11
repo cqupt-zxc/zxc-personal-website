@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { MotionProvider } from "@/components/motion/motion-provider";
+import { getSiteOrigin } from "@/lib/env/public";
 import "./globals.css";
 import "./motion.css";
 import "./admin-fixes.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
+const siteUrl = getSiteOrigin();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
