@@ -1,6 +1,6 @@
 # Project handoff and baseline audit
 
-**Last updated**: 2026-08-10 (baseline audit at commit `71e1625`; Phase 0B RLS repository implementation is present locally but has not been applied to any Supabase project).
+**Last updated**: 2026-08-11 (audited application baseline commit `71e1625`; Phase 0C disposable migration/catalog/privilege verification completed, while real actor verification remains pending).
 **Repository**: `https://github.com/cqupt-zxc/zxc-personal-website`.
 **Status**: production build succeeds without service configuration, but production deployment is blocked by the P0 items below.
 
@@ -71,15 +71,14 @@ Local-only screenshots from this audit are stored under `audit/baseline-2026-08-
 
 ### P0-1 — Database authorization bypasses the admin allowlist
 
-- **Problem**: [`supabase/schema.sql`](supabase/schema.sql) grants `FOR ALL` access on `site_content` to every Supabase user in the `authenticated` role. `ADMIN_EMAILS` is checked only in the Next.js application.
-- **Why it matters**: Any authenticated account can call the Supabase Data API directly and insert, update, or delete the public content row without visiting `/admin`. Supabase documents that `authenticated` means any signed-in user; application-only authorization is not a database security boundary.
-- **Severity**: P0 — public-site defacement and data-integrity risk.
-- **Recommended fix**: Replace the permissive policy with database-enforced admin authorization. Prefer an immutable `app_metadata` custom claim/RBAC policy or a dedicated admin table keyed by `auth.uid()`. Restrict operations to the minimum needed (`SELECT` public; admin-only `INSERT`/`UPDATE`; normally no client `DELETE`). Disable open signup or make authentication invite-only if only maintainers should have accounts.
-- **Modification risk**: High. A bad policy can lock out the editor or remain permissive. Apply in a non-production Supabase project first and include rollback SQL.
-- **Verification**: With two test users, prove the allowlisted admin can update row `id = 1` and a normal authenticated user receives an RLS denial through the direct Data API. Also prove anonymous public reads still work.
-- **Phase 0A design status (2026-08-10)**: A design-only review on local branch `security/phase-0a-rls` finalizes non-API schema `app_private`, containing `app_private.admin_users(user_id uuid)` and a hardened `app_private.is_site_admin()` `SECURITY DEFINER` helper. The target policy set is public `SELECT`, admin-only `INSERT`/`UPDATE`, and no `DELETE`; `site_content` grants are reset explicitly rather than inherited. The schema/table/function preflight must fail closed on unknown state.
-- **Phase 0B repository implementation (2026-08-10, pending user review)**: Added `supabase/migrations/20260810143000_harden_site_content_rls.sql` for existing-project upgrades, synchronized the fresh-install `supabase/schema.sql`, and added a static Vitest contract plus Phase 0C integration test plan. The migration has not been executed anywhere; no Supabase project or dashboard was connected or changed, no administrator was seeded, and no production configuration was modified. Static contract tests and source review can verify repository intent only: **SQL syntax / RLS runtime behavior not yet integration-verified**. Phase 0C must run the documented direct-API actor matrix in a disposable or preview Supabase environment before any production rollout.
-- **Bootstrap prerequisite (unresolved)**: Before any real bootstrap, manually inspect Supabase Auth and confirm the canonical UUID or UUIDs for the intended Email and GitHub identities, whether identities are linked, and which exact UID(s) receive membership. Do not derive membership dynamically from an email match. No real UID is recorded here.
+- **Audited baseline problem**: At audited application baseline commit `71e1625`, `site_content` granted `FOR ALL` access to every `authenticated` user. `ADMIN_EMAILS` was checked only in the Next.js application, so it was not a database authorization boundary.
+- **Why it matters**: An authenticated user can bypass page-level checks by calling the Supabase Data API directly if database privileges and RLS remain permissive. This is a public-site defacement and data-integrity risk.
+- **Phase 0A design (2026-08-10)**: The approved architecture is `public.site_content`, `app_private.admin_users(user_id uuid)`, and the hardened `app_private.is_site_admin()` `SECURITY DEFINER` helper. The target is public `SELECT`, admin-only `INSERT`/`UPDATE`, and no `DELETE`; authorization is based on `auth.uid()`, not `ADMIN_EMAILS`.
+- **Phase 0B repository implementation**: Commit `08909276e48c8f19e14e61dba6a0c933c6e9580b` adds `supabase/migrations/20260810143000_harden_site_content_rls.sql`, synchronizes the fresh-install `supabase/schema.sql`, and adds the static contract and integration-test plan.
+- **Phase 0C-1 disposable verification (2026-08-11)**: In the non-production disposable project `zxc-portfolio-rls-test`, the committed migration executed successfully. `app_private.admin_users` and `app_private.is_site_admin()` exist; the three replacement `site_content` policies exist; the legacy authenticated `FOR ALL` policy is absent; `anon` has only `SELECT`; `authenticated` has `SELECT`/`INSERT`/`UPDATE` with no `DELETE` or `TRUNCATE`; ordinary API roles cannot directly access `admin_users`; and `app_private` is not exposed through the Data API. Normal and admin test users were created, and one exact test UID was inserted as an admin membership. No production project was changed and no production admin was seeded.
+- **Current status (2026-08-11)**: **P0-1 implementation complete; disposable migration/catalog/privilege verification passed; real authenticated actor matrix and membership revoke/re-add verification remain pending before production deployment.** This is not a claim that P0-1 is fully closed, fully verified, secure, or production-ready.
+- **Mandatory production-deployment verification still pending**: (1) Phase 0C-2 direct Data API matrix using publishable/anon key and separately authenticated anonymous, normal, and admin actors; and (2) Phase 0C-3 removal and re-addition of a membership, proving the same live admin session loses and regains write access on its next database request. The in-app Browser could not execute the temporary Data API request page because of its safety policy; the tests were deliberately deferred, not failed.
+- **Bootstrap prerequisite (unresolved)**: Before any production bootstrap, manually inspect Supabase Auth and confirm the canonical UUID or UUIDs for the intended Email and GitHub identities, whether identities are linked, and which exact UID(s) receive membership. Do not derive membership dynamically from an email match.
 
 ### P0-2 — GitHub OAuth setup instructions conflate two callbacks
 
@@ -89,6 +88,7 @@ Local-only screenshots from this audit are stored under `audit/baseline-2026-08-
 - **Recommended fix**: Split the deployment instructions into GitHub OAuth App callback, Supabase Site URL, Supabase Redirect URLs, and application `NEXT_PUBLIC_SITE_URL`. Use exact production URLs; keep local and preview patterns separate.
 - **Modification risk**: Low for documentation, medium for dashboard configuration because changing callbacks affects live login.
 - **Verification**: Complete a fresh GitHub login from `/admin/login`, observe return through `/auth/callback`, confirm a non-admin is signed out, and confirm an allowlisted admin lands on `/admin`.
+- **Phase 0D repository status (2026-08-11)**: The application flow was reviewed without changing application code. With a valid `NEXT_PUBLIC_SITE_URL`, `signInWithOAuth` uses `<site-origin>/auth/callback`, and that route exchanges the code, rejects a non-allowlisted user at the application layer, and redirects an allowed user to `/admin`. README and `.env.example` now distinguish the provider callback, Supabase Site URL, Redirect URLs, and application `redirectTo`. No GitHub, Supabase, Vercel, or production configuration has been changed; the live OAuth verification above remains required.
 
 ### P0-3 — Locked dependencies have known high-severity advisories
 
@@ -101,7 +101,7 @@ Local-only screenshots from this audit are stored under `audit/baseline-2026-08-
 
 ### P0-4 — Production readiness depends on unvalidated environment and placeholder content
 
-- **Problem**: There is no central environment validation. Without Supabase variables, `/admin` throws a server exception, while the public site silently publishes demo values such as `hello@example.com`, `你的学校`, and a placeholder honor. The `.env.example` site URL uses port 3000 while the README uses 3001.
+- **Problem**: There is no central environment validation. Without Supabase variables, `/admin` throws a server exception, while the public site silently publishes demo values such as `hello@example.com`, `你的学校`, and a placeholder honor. Phase 0D standardized the documented local origin to port 3001, but it does not add runtime validation.
 - **Why it matters**: A Vercel deployment can appear successful while admin is broken, metadata points at the wrong origin, and placeholder personal content is public.
 - **Severity**: P0 — release-readiness blocker.
 - **Recommended fix**: Add server-only environment parsing with clear required/optional groups, a controlled unavailable state for admin/private features, consistent local origin handling, and a pre-launch content checklist. Keep service-role, private password, and GitHub token variables server-only.
@@ -327,12 +327,12 @@ Local-only screenshots from this audit are stored under `audit/baseline-2026-08-
 
 This checklist separates provider callbacks, application redirects, secrets, and release content.
 
-1. Set the production domain in Vercel and set `NEXT_PUBLIC_SITE_URL=https://<production-domain>` for Production. Define a deliberate Preview strategy rather than reusing the production origin blindly.
+1. Set the production domain in Vercel and set `NEXT_PUBLIC_SITE_URL=https://<production-domain>` for Production. For local development, use the documented `http://localhost:3001` origin.
 2. Add `NEXT_PUBLIC_SUPABASE_URL` and the Supabase publishable/anon key to the required Vercel environments.
 3. Keep the Supabase secret/service-role key, `ADMIN_EMAILS`, `PRIVATE_ARCHIVE_PASSWORD`, and optional `GITHUB_TOKEN` server-only. Never add `NEXT_PUBLIC_` to them.
-4. In Supabase Auth URL Configuration, set Site URL to the production origin. Add exact production `/auth/callback`, the chosen local callback, and deliberate Vercel preview patterns to Redirect URLs.
-5. In the GitHub OAuth App, use the callback shown by Supabase: `https://<project-ref>.supabase.co/auth/v1/callback`. Do not use the website callback there.
-6. Apply and test corrected RLS before enabling public signup or OAuth. Prefer invite-only accounts for a personal admin surface.
+4. In Supabase Auth URL Configuration, set Site URL to the production origin. Add exact `http://localhost:3001/auth/callback` and `https://<production-domain>/auth/callback` entries to Redirect URLs. For OAuth-enabled previews, use a deliberately assigned stable preview origin and its exact callback; do not add an unconstrained preview wildcard by default.
+5. In the GitHub OAuth App, use the callback shown by Supabase: `https://<project-ref>.supabase.co/auth/v1/callback`. Do not use the website `/auth/callback` route there; that route is the application's post-auth `redirectTo` target.
+6. Apply the corrected RLS only through a controlled production rollout after the mandatory Phase 0C-2 actor matrix and Phase 0C-3 membership revoke/re-add tests pass. Prefer invite-only accounts for a personal admin surface.
 7. Create `private-archive` as a private bucket with explicit file-size and MIME restrictions. Do not add public-read policies. Define object prefixes before adding real private files.
 8. Seed and review real public content so no demo email, school, honor, or relationship placeholder is deployed.
 9. Add favicon, robots, sitemap, canonical metadata, and noindex rules for sensitive routes.
@@ -351,7 +351,7 @@ Useful official references:
 
 The sequence keeps security and release correctness ahead of refactoring and visual polish.
 
-1. **Phase 0 — close release blockers**: correct RLS with database-level admin authorization; correct OAuth documentation/dashboard settings; add environment validation and explicit unavailable states; plan and execute the dependency upgrade; replace placeholder content. Exit when a non-admin cannot write through the Data API, OAuth works end-to-end, high/critical production advisories are cleared or formally accepted, and no placeholder content is public.
+1. **Phase 0 — close release blockers**: implement and verify RLS with database-level admin authorization; correct OAuth documentation/dashboard settings; add environment validation and explicit unavailable states; plan and execute the dependency upgrade; replace placeholder content. Exit only when the Phase 0C-2 anonymous/normal/admin Data API actor matrix and Phase 0C-3 membership revoke/re-add test pass in a disposable or preview project, OAuth works end-to-end, high/critical production advisories are cleared or formally accepted, and no placeholder content is public.
 2. **Phase 1 — make critical flows trustworthy**: add runtime content schemas, reliable admin action states, auth/private error handling, GitHub partial-failure preservation, and decide whether to complete or hide the private archive. Exit when all failure paths are visible, tested, and recoverable.
 3. **Phase 2 — establish the deployment gate**: configure ESLint/formatting, scripts, CI, Supabase/RLS integration tests, route/API tests, and focused browser E2E tests. Exit when a clean checkout passes the full non-interactive pipeline.
 4. **Phase 3 — restore static public delivery and reduce payload**: split public/authenticated Supabase clients, add cache invalidation, narrow Client Components, optimize/remove images, and settle the font strategy. Exit when public routes retain static/ISR behavior with production-shaped configuration and measured bundle/media costs improve.
@@ -360,8 +360,8 @@ The sequence keeps security and release correctness ahead of refactoring and vis
 
 ## Next-session starting point
 
-Begin with **P0-1 database authorization** and **P0-2 OAuth configuration**, because later admin and deployment work is unsafe to validate against the current permissive policy and ambiguous callback instructions. Do the RLS change in a disposable or preview Supabase project, capture direct-API tests for admin and non-admin users, and only then update the production project.
+Phase 0D repository documentation is complete, but no provider or deployment dashboard has been changed. Before a production rollout, complete the mandatory Phase 0C-2 direct Data API actor matrix and Phase 0C-3 membership revoke/re-add test in a disposable or preview project, then perform the GitHub OAuth / Supabase Auth / Vercel configuration checklist through a separately approved manual change window. Do not treat the P0-1 migration as production-ready until those actor tests pass.
 
 ---
 
-*Created 2026-08-10. Revise the date and verified-baseline facts whenever dependencies, deployment configuration, or security posture changes.*
+*Created 2026-08-10. Revised 2026-08-11 (Phase 0C disposable RLS verification status and Phase 0D OAuth documentation status). Revise the date and verified-baseline facts whenever dependencies, deployment configuration, or security posture changes.*
