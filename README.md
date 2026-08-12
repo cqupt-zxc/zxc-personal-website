@@ -24,6 +24,21 @@ npm run dev -- -p 3001
 
 没有配置 Supabase 时，公开首页会使用项目内的演示内容；管理后台、登录和私密档案需要按下方步骤配置服务。
 
+### 环境模式与 Production 预检
+
+- **Local/demo**：可以不配置 Supabase；`/` 和 `/us` 使用演示内容，管理、登录和私密档案会显示“服务暂不可用”。普通 `npm run build` 保持支持该工作流。
+- **Preview**：可按需要配置 Supabase；GitHub enrichment 仍可关闭。默认不启用 GitHub OAuth，若启用则使用受控且稳定的 preview origin。
+- **Production**：必须配置 `NEXT_PUBLIC_SITE_URL`、`NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_ANON_KEY`、`ADMIN_EMAILS`、`PRIVATE_ARCHIVE_PASSWORD` 和 `SUPABASE_SERVICE_ROLE_KEY`。`GITHUB_USERNAME` 与 `GITHUB_TOKEN` 保持可选。
+
+在部署前执行：
+
+```bash
+npm run validate:production-env
+npm run build:production
+```
+
+`validate:production-env` 只输出缺失或非法的变量名，不会输出变量值。未来配置 Vercel Production Build Command 时应使用 `npm run build:production`；本仓库不会自动修改现有 Vercel 项目配置。
+
 ## Supabase 与登录配置
 
 先创建数据库与 Storage，再分别配置 GitHub OAuth App、Supabase Auth URL Configuration 和应用回跳地址。这四类 URL 不是同一个概念，不能互相替代。

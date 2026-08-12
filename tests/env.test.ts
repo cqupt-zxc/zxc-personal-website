@@ -1,3 +1,5 @@
+import { spawnSync } from "node:child_process";
+import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
@@ -5,13 +7,16 @@ vi.mock("server-only", () => ({}));
 import {
   EnvironmentConfigurationError,
   getOptionalPublicSupabaseConfig,
+  isEnvironmentConfigurationError,
   parseSiteOrigin,
+  requireSiteOrigin,
   requirePublicSupabaseConfig,
 } from "../lib/env/public";
 import {
   getOptionalGitHubEnrichmentConfig,
   getOptionalPrivateArchiveConfig,
   requireAdminEmailAllowlist,
+  requirePrivateArchiveConfig,
 } from "../lib/env/server";
 
 describe("site origin configuration", () => {
@@ -33,6 +38,11 @@ describe("site origin configuration", () => {
     "ftp://example.com",
   ])("rejects a non-origin value: %s", (value) => {
     expect(() => parseSiteOrigin(value)).toThrow(EnvironmentConfigurationError);
+  });
+
+  it("requires an explicit site origin for OAuth-dependent features", () => {
+    expect(() => requireSiteOrigin({})).toThrow(EnvironmentConfigurationError);
+    expect(requireSiteOrigin({ NEXT_PUBLIC_SITE_URL: "https://example.com/" })).toBe("https://example.com");
   });
 });
 
@@ -68,8 +78,18 @@ describe("server-only configuration", () => {
   });
 
   it("rejects an absent or empty admin email allowlist", () => {
-    expect(() => requireAdminEmailAllowlist({})).toThrow(EnvironmentConfigurationError);
-    expect(() => requireAdminEmailAllowlist({ ADMIN_EMAILS: " , " })).toThrow(EnvironmentConfigurationError);
+    expect(() => requireAdminEmailAllowlist({})).toThrow("ADMIN_EMAILS");
+    expect(() => requireAdminEmailAllowlist({ ADMIN_EMAILS: " , " })).toThrow("ADMIN_EMAILS");
+  });
+
+  it("marks server configuration failures with the shared error code", () => {
+    try {
+      requireAdminEmailAllowlist({});
+    } catch (error) {
+      expect(isEnvironmentConfigurationError(error)).toBe(true);
+      return;
+    }
+    throw new Error("Expected missing ADMIN_EMAILS to fail validation.");
   });
 
   it("disables GitHub enrichment when no username is configured", () => {
@@ -99,6 +119,54 @@ describe("server-only configuration", () => {
     { PRIVATE_ARCHIVE_PASSWORD: "private-password" },
     { SUPABASE_SERVICE_ROLE_KEY: "service-role-key" },
   ])("rejects partial private archive configuration", (environment) => {
-    expect(() => getOptionalPrivateArchiveConfig(environment)).toThrow(EnvironmentConfigurationError);
+    expect(() => getOptionalPrivateArchiveConfig(environment)).toThrow("Private archive configuration");
+  });
+
+  it("requires complete private archive configuration for protected routes", () => {
+    expect(() => requirePrivateArchiveConfig({})).toThrow("Private archive features");
+  });
+});
+
+describe("production environment preflight", () => {
+  const script = path.resolve(process.cwd(), "scripts/validate-production-env.js");
+  const productionEnvironment: NodeJS.ProcessEnv = {
+    NODE_ENV: "test",
+    NEXT_PUBLIC_SITE_URL: "https://example.com",
+    NEXT_PUBLIC_SUPABASE_URL: "https://project.supabase.co",
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
+    ADMIN_EMAILS: "owner@example.com",
+    PRIVATE_ARCHIVE_PASSWORD: "test-private-password",
+    SUPABASE_SERVICE_ROLE_KEY: "test-service-role-key",
+  };
+
+  function runPreflight(environment: NodeJS.ProcessEnv) {
+    return spawnSync(process.execPath, [script], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      env: environment,
+    });
+  }
+
+  it("passes with all required production configuration and no GitHub enrichment", () => {
+    expect(runPreflight(productionEnvironment).status).toBe(0);
+  });
+
+  it.each([
+    "NEXT_PUBLIC_SITE_URL",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "ADMIN_EMAILS",
+    "PRIVATE_ARCHIVE_PASSWORD",
+    "SUPABASE_SERVICE_ROLE_KEY",
+  ])("fails without required production configuration: %s", (name) => {
+    const result = runPreflight({ ...productionEnvironment, [name]: undefined } as NodeJS.ProcessEnv);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(name);
+  });
+
+  it("fails for a malformed production site origin", () => {
+    const result = runPreflight({ ...productionEnvironment, NEXT_PUBLIC_SITE_URL: "https://example.com/path" });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("NEXT_PUBLIC_SITE_URL");
   });
 });

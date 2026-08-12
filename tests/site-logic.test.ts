@@ -7,8 +7,8 @@ import { getNextDistDir } from "../lib/next-dist-dir";
 
 describe("site access rules", () => {
   it("allows only emails explicitly listed as administrators", () => {
-    expect(isAdminEmail("owner@example.com", "owner@example.com, admin@example.com")).toBe(true);
-    expect(isAdminEmail("visitor@example.com", "owner@example.com, admin@example.com")).toBe(false);
+    expect(isAdminEmail("owner@example.com", ["owner@example.com", "admin@example.com"])).toBe(true);
+    expect(isAdminEmail("visitor@example.com", ["owner@example.com", "admin@example.com"])).toBe(false);
   });
 
   it("uses a stable, HttpOnly private archive cookie name", () => {

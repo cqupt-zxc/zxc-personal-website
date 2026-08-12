@@ -1,6 +1,6 @@
 # Project handoff and baseline audit
 
-**Last updated**: 2026-08-11 (Phase 0C disposable migration/catalog/privilege verification completed while real actor verification remains pending; Phase 0E-2A environment validation core completed).
+**Last updated**: 2026-08-12 (Phase 0C disposable migration/catalog/privilege verification completed while real actor verification remains pending; Phase 0E repository-side environment work completed).
 **Repository**: `https://github.com/cqupt-zxc/zxc-personal-website`.
 **Status**: production build succeeds without service configuration, but production deployment is blocked by the P0 items below.
 
@@ -107,7 +107,7 @@ Local-only screenshots from this audit are stored under `audit/baseline-2026-08-
 - **Recommended fix**: Add server-only environment parsing with clear required/optional groups, a controlled unavailable state for admin/private features, consistent local origin handling, and a pre-launch content checklist. Keep service-role, private password, and GitHub token variables server-only.
 - **Modification risk**: Medium. Making every variable mandatory could prevent useful demo builds; separate public fallback mode from production mode.
 - **Verification**: Test three matrices: no-service demo, valid preview services, and production configuration. Each should have explicit expected routes, metadata origins, and failure messages.
-- **Phase 0E-2A repository status (2026-08-11)**: Added public environment parsing for canonical site origins and optional/required public Supabase configuration, plus a `server-only` module for parsed admin allowlists, private-archive configuration, and optional GitHub enrichment configuration. `app/layout.tsx`, `lib/content.ts`, and `lib/supabase/server.ts` now use the public validation layer; this preserves the no-service public demo fallback, rejects partial Supabase configuration, and replaces the server client’s environment non-null assertions. The 22 environment tests pass, as do the full 41-test suite, TypeScript, and production build. Route-level controlled unavailable states, private/admin/auth/GitHub call-site integration, and the production-specific build gate remain Phase 0E-2B work. **P0-4 remains open and is not production-ready.**
+- **Phase 0E repository status (2026-08-11)**: Phase 0E-2A is commit `eed15b7dd7d49c593129bff66455b83b4b661082`, which adds the public/server environment validation core. Phase 0E-2B integrates it into `/admin`, `/admin/login`, `/auth/callback`, `/us/private`, `/api/private/media`, and GitHub enrichment: missing configuration now produces controlled unavailable states or a fixed `error=configuration` redirect; private media returns `503` when its feature configuration is unavailable and retains `401` for failed private access; GitHub remains optional. `ADMIN_EMAILS` is parsed once through the server module and remains only an application-level UX/auth guard, not a database authorization boundary. `npm run validate:production-env` and `npm run build:production` provide an explicit repository-side production gate for the site origin, public Supabase pair, admin allowlist, private password, and service-role key; GitHub enrichment remains optional. Regular `npm run build` still supports no-service local/demo use. No provider dashboard was changed. **Phase 0E is complete at repository scope, but P0-4 remains open and not production-ready until the required real Production configuration is entered and checked, and Phase 0G removes/reviews public placeholder content.**
 
 ## P1 — correctness and reliability
 
@@ -361,8 +361,8 @@ The sequence keeps security and release correctness ahead of refactoring and vis
 
 ## Next-session starting point
 
-Phase 0D repository documentation is complete, but no provider or deployment dashboard has been changed. Before a production rollout, complete the mandatory Phase 0C-2 direct Data API actor matrix and Phase 0C-3 membership revoke/re-add test in a disposable or preview project, then perform the GitHub OAuth / Supabase Auth / Vercel configuration checklist through a separately approved manual change window. Do not treat the P0-1 migration as production-ready until those actor tests pass.
+Phase 0E repository-side environment work is complete, but no provider or deployment dashboard has been changed. Before a production rollout, configure real Production variables and use `npm run build:production`, complete the mandatory Phase 0C-2 direct Data API actor matrix and Phase 0C-3 membership revoke/re-add test in a disposable or preview project, then perform the GitHub OAuth / Supabase Auth / Vercel configuration checklist through a separately approved manual change window. Do not treat the P0-1 migration as production-ready until those actor tests pass.
 
 ---
 
-*Created 2026-08-10. Revised 2026-08-11 (Phase 0C disposable RLS verification status, Phase 0D OAuth documentation status, and Phase 0E-2A environment validation core). Revise the date and verified-baseline facts whenever dependencies, deployment configuration, or security posture changes.*
+*Created 2026-08-10. Revised 2026-08-12 (Phase 0C disposable RLS verification status, Phase 0D OAuth documentation status, and Phase 0E repository-side environment validation/integration). Revise the date and verified-baseline facts whenever dependencies, deployment configuration, or security posture changes.*

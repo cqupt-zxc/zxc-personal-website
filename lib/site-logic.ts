@@ -22,9 +22,8 @@ export function verifyPrivateAccessToken(token: string | undefined, secret: stri
   return suppliedBuffer.length === expectedBuffer.length && timingSafeEqual(suppliedBuffer, expectedBuffer);
 }
 
-export function isAdminEmail(email: string | undefined, allowlist: string | undefined) {
-  if (!email || !allowlist) return false;
-  return allowlist.split(",").map((item) => item.trim().toLowerCase()).includes(email.toLowerCase());
+export function isAdminEmail(email: string | undefined, allowlist: readonly string[]) {
+  return email ? allowlist.includes(email.toLowerCase()) : false;
 }
 
 export function selectedRepositoryNames(names: string[]) {

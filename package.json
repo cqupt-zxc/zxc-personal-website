@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:production": "npm run validate:production-env && next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "validate:production-env": "node scripts/validate-production-env.js"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
