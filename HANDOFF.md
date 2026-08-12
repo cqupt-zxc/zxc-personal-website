@@ -98,6 +98,7 @@ Local-only screenshots from this audit are stored under `audit/baseline-2026-08-
 - **Recommended fix**: Test a controlled Next.js 16 upgrade on a branch, update the lint workflow at the same time, and use the smallest safe override/update for Nano ID if compatible. Do not run `npm audit fix --force` blindly.
 - **Modification risk**: High. Next.js 16 is a major upgrade and may require framework, lint, and runtime changes.
 - **Verification**: Require `npm audit` to have no high/critical production findings, then rerun tests, typecheck, lint, build, route smoke tests, image rendering, and OAuth/Supabase integration tests.
+- **Phase 0F repository status (2026-08-12)**: The approved read-only audit found four high records: Nano ID 3.3.16, Next.js 15.5.22 through nested PostCSS 8.4.31, and Sharp 0.34.5. Commit `82ff423` refreshes the existing compatible Nano ID resolution to 3.3.18 without adding a direct dependency or override. The controlled Next.js upgrade moves the direct framework dependency from 15.5.22 to exact 16.3.0; its resolved tree contains nested PostCSS 8.5.23 and Sharp 0.35.3. React/React DOM remain 19.2.8; Supabase, Tailwind, TypeScript, Vitest, and Framer Motion were not upgraded. Next 16's generated TypeScript compatibility changes are committed, and the obsolete `next lint` script was removed because no ESLint setup exists; a real lint/CI gate remains Phase 2 work. With the final dependency tree, `npm audit` reports 0 vulnerabilities. Unit tests, TypeScript, local and fake-production builds, Turbopack dev startup, and no-service route smoke tests passed. **Phase 0F repository dependency remediation is complete, but this does not make Phase 0 or production deployment ready.**
 
 ### P0-4 — Production readiness depends on unvalidated environment and placeholder content
 
@@ -158,7 +159,7 @@ Local-only screenshots from this audit are stored under `audit/baseline-2026-08-
 
 ### P1-6 — Deployment checks do not provide a reliable gate
 
-- **Problem**: `npm run lint` is interactive and there is no ESLint config, CI workflow, route test, RLS test, browser test, or coverage threshold. Current Vitest tests cover pure helpers only.
+- **Problem**: There is no ESLint configuration or lint script, CI workflow, route test, RLS test, browser test, or coverage threshold. The obsolete Next.js `next lint` script was removed during the Phase 0F Next 16 upgrade rather than leaving a known-invalid gate in the repository. Current Vitest tests cover pure helpers only.
 - **Why it matters**: The passing 16 tests do not exercise authentication, server actions, Supabase authorization, APIs, error states, or responsive behavior.
 - **Severity**: P1.
 - **Recommended fix**: Configure ESLint CLI, add a non-interactive `typecheck` script, create CI for install/lint/typecheck/test/build/audit, and add targeted integration/E2E tests for the deployment-critical flows.
@@ -361,8 +362,8 @@ The sequence keeps security and release correctness ahead of refactoring and vis
 
 ## Next-session starting point
 
-Phase 0E repository-side environment work is complete, but no provider or deployment dashboard has been changed. Before a production rollout, configure real Production variables and use `npm run build:production`, complete the mandatory Phase 0C-2 direct Data API actor matrix and Phase 0C-3 membership revoke/re-add test in a disposable or preview project, then perform the GitHub OAuth / Supabase Auth / Vercel configuration checklist through a separately approved manual change window. Do not treat the P0-1 migration as production-ready until those actor tests pass.
+Phase 0F repository dependency remediation is complete, but no provider or deployment dashboard has been changed. Before a production rollout, configure real Production variables and use `npm run build:production`, complete the mandatory Phase 0C-2 direct Data API actor matrix and Phase 0C-3 membership revoke/re-add test in a disposable or preview project, perform the GitHub OAuth / Supabase Auth / Vercel configuration checklist through a separately approved manual change window, and complete Phase 0G production placeholder/content cleanup. Do not treat the P0-1 migration as production-ready until those actor tests pass.
 
 ---
 
-*Created 2026-08-10. Revised 2026-08-12 (Phase 0C disposable RLS verification status, Phase 0D OAuth documentation status, and Phase 0E repository-side environment validation/integration). Revise the date and verified-baseline facts whenever dependencies, deployment configuration, or security posture changes.*
+*Created 2026-08-10. Revised 2026-08-12 (Phase 0C disposable RLS verification status, Phase 0D OAuth documentation status, Phase 0E environment validation/integration, and Phase 0F dependency remediation). Revise the date and verified-baseline facts whenever dependencies, deployment configuration, or security posture changes.*
