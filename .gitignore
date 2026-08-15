@@ -14,3 +14,6 @@ audit/
 *.log
 .DS_Store
 Thumbs.db
+
+# Private personal materials
+/张轩诚个人资料/

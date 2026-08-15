@@ -31,9 +31,10 @@ function StickyCard({ project, index, total }: { project: Project; index: number
 }
 
 export function StickyProjects({ projects }: { projects: Project[] }) {
-  const selected = projects.slice(0, 6);
+  const selected = projects.slice(0, 3);
+  if (!selected.length) return null;
   return <section className="sticky-projects-section" id="projects">
     <div className="projects-heading"><span>BUILDING IN PUBLIC</span><h2 className="display-heading">PROJECTS</h2></div>
-    {selected.length ? selected.map((project, index) => <StickyCard index={index} key={`${project.name}-${project.url}`} project={project} total={selected.length} />) : <div className="projects-empty">精选项目将在管理后台更新。</div>}
+    {selected.map((project, index) => <StickyCard index={index} key={`${project.name}-${project.url}`} project={project} total={selected.length} />)}
   </section>;
 }
