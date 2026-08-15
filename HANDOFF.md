@@ -6,24 +6,58 @@ This is the handoff record for maintainers and incoming Codex sessions. It recor
 
 | Field | Verified state |
 |:--|:--|
-| Evidence timestamp | 2026-08-14; documentation-governance work-acceptance repair. Historical checks retain their own dates. |
+| Evidence timestamp | 2026-08-15; Repository Hygiene and Accepted Work Recording. Historical checks retain their own dates. |
 | Repository | `https://github.com/cqupt-zxc/zxc-personal-website` |
-| Branch / HEAD at calibration | `security/phase-0a-rls` / `710f3639ed12a046233b6e556051cde098c019f0` |
-| Working tree at latest calibration | Documentation-only modifications are limited to `AGENTS.md`, `PROJECT_PLAN.md`, and `HANDOFF.md`; re-check `git status` before any later work. |
+| Branch / HEAD at hygiene calibration | `codex/site-foundation` / `1abcfa0`; the branch was renamed locally from `security/phase-0a-rls` after confirming that it has no upstream. The repository remains a normal, non-bare Git repository. |
+| Commit boundaries | `2c64e0f` contains only the accepted Phase 1A homepage files and `tests/homepage-content.test.ts`; `1abcfa0` contains only the accepted `.gitignore` private-source root rule; this governance record is the only intended content of the following documentation commit. |
+| Working tree at documentation-commit staging | Only `AGENTS.md`, `PROJECT_PLAN.md`, and `HANDOFF.md` remain for the documentation-governance commit. `next-env.d.ts` returned to its HEAD content after the final Next.js build and is not staged. |
 | Plan reference | [`PROJECT_PLAN.md`](PROJECT_PLAN.md) is authoritative for phase and task authorization. |
-| Current authorization | Phase 0 remains open; no phase or engineering task is currently authorized. |
-| Implementation headline | Repository-side RLS, OAuth guidance, environment handling, and dependency-remediation work have recorded evidence. Production acceptance remains blocked by the gates below. |
-| Latest recorded verification | Phase 0F records unit tests, TypeScript, local/fake-production builds, Turbopack startup, no-service route smoke tests, and `npm audit` with zero vulnerabilities on 2026-08-12. This is historical evidence, not a fresh verification of the current tree. |
-| Recommended handoff point | Do not start Phase 0G-1 automatically. Obtain explicit authorization, then calibrate again and preserve the deferred production gates. |
+| Current authorization | No engineering task is active. Work/User closed Phase 1B-0; Phase 0 remains open and all later Phase 1B tasks remain unauthorized. See [`PROJECT_PLAN.md`](PROJECT_PLAN.md). |
+| Implementation headline | Phase 1A is closed by Work/User. Phase 1B-0 added no application, UI, dependency, schema, migration, production-configuration, or website-content change; its only Phase 1B-0 tracked files are `.gitignore` and this factual evidence update. |
+| Latest recorded verification | 2026-08-15: `npm test` passed 7 files and 59 tests; `npx tsc --noEmit --incremental false` passed; and `npm run build` passed. The staged commit boundaries and `git diff --check` were reviewed before each commit. |
+| Recommended handoff point | Phase 1B-0 is closed by Work/User. The hygiene task must finish with a clean working tree, a locally excluded design-reference file, no tracked/staged private source material, and no push, merge, deployment, or later Phase 1B work. Wait for a new explicit authorization. |
 
 ## Contents
 
 - [Engineering architecture](#engineering-architecture)
+- [Phase 1B-0 source protection and inventory evidence](#phase-1b-0-source-protection-and-inventory-evidence)
+- [Phase 1A implementation evidence](#phase-1a-implementation-evidence)
+- [Repository hygiene and accepted-work recording](#repository-hygiene-and-accepted-work-recording)
 - [Historical baseline and completed repository evidence](#historical-baseline-and-completed-repository-evidence)
 - [Open production and external verification gates](#open-production-and-external-verification-gates)
 - [Engineering backlog retained for future authorization](#engineering-backlog-retained-for-future-authorization)
 - [Production configuration evidence status](#production-configuration-evidence-status)
 - [Handoff rules and next checkpoint](#handoff-rules-and-next-checkpoint)
+
+## Phase 1B-0 source protection and inventory evidence
+
+This entry records the remediated metadata-only protection, inventory, classification, Work/User public-use decision, independent review, and Work/User closure completed on 2026-08-15. It contains no source contents, filenames, paths, previews, or source-ID mapping, and it does not publish material.
+
+### Verified
+
+- The exact root-directory ignore rule in `.gitignore` matches the sensitive source set and its private review directory. Fresh `git check-ignore`, `git status`, tracked-file, reachable-history, and global `git add --all --dry-run` checks found zero source entries staged, tracked, or candidate for staging.
+- The independent Git review found no source-path evidence in the checked reflogs, unreachable-tree metadata, repository configuration references, logs, screenshots, or build-output references. It could not perform a content-level identity comparison against isolated blobs with no directory context, which remains a stated limitation.
+- Work/User subsequently reduced the local source set and explicitly confirmed that every item currently retained may be publicly used. Codex did not move, rename, delete, or copy any original source file.
+- The current source set contains 115 files in 33 subdirectories (121,956,271 bytes, about 116.3 MiB) across 9 file formats. The rebuilt private metadata inventory assigns every current original file one stable, unique Source ID; no duplicate group remains. No source content was opened, copied into repository files, website content, screenshots, logs, prompts, or public drafts.
+- The classification matrix covers all 115 current Source IDs exactly once. Confirmed public content is 115; Private and Need user confirmation are both 0, based on the explicit Work/User public-use decision. This records permission for future use only; it does not publish material or independently verify every factual claim, copyright/licence, third-party consent, or contextual redaction requirement.
+- The ignored private review directory holds the inventory, two non-overlapping batch lists, two classification matrices, a decision list, a review report, and reproducible local generation scripts. All are ignored, untracked, and unstaged.
+
+### Human Gate A outcome and remaining decisions
+
+- Work/User selected the precise ignore-rule approach. `.gitignore` is the Phase 1B-0 tracked protection change; the source directory itself was not moved, renamed, deleted, copied, staged, or committed.
+- The private, Source-ID-only decision list records Work/User's `Approve public` decision for every current Source ID. Before any later use, retain the separate phase-authorization boundary and validate source-specific facts, rights, third-party consent, and any needed redaction.
+- The earlier independent reviewer established the inventory/batch/Git-boundary process. After Work/User reduced the source set and supplied the public-use decision, the lead re-ran the current inventory/classification/Git reconciliation locally. It found complete Source-ID coverage, the recorded Work/User approval on every current item, no private locator field in classification output, and no new scope creep. The pre-existing Phase 1A code/test diff remains outside this task and is not evidence of a Phase 1B-0 application change.
+- Work/User accepted the Phase 1B-0 evidence and results and closed the task on 2026-08-15. The closure creates no authorization for Phase 1B-2, Phase 1B-3, publication, production work, deployment, release, push, or merge.
+
+## Repository hygiene and accepted-work recording
+
+This entry records the local Git-history cleanup authorized on 2026-08-15. It preserves the accepted Phase 1A and Phase 1B-0 boundaries without extending their authorization.
+
+- The local branch is `codex/site-foundation`; it has no upstream. No remote branch, push, merge, pull request, deployment, release, or production configuration action occurred.
+- The local design-reference file remains unchanged, untracked, and protected only by an exact local `.git/info/exclude` entry. The local rule is intentionally not part of the public `.gitignore`.
+- The accepted Phase 1A homepage foundation is recorded in `2c64e0f` and includes `tests/homepage-content.test.ts`. The accepted Phase 1B-0 protection rule is recorded in `1abcfa0` and is limited to `.gitignore`.
+- The final build restored `next-env.d.ts` to its HEAD content. It is intentionally excluded from all three hygiene commits.
+- Before the documentation-governance commit, the only remaining changes are `AGENTS.md`, `PROJECT_PLAN.md`, and this ledger. The final closeout check must confirm that the working tree is clean and no private material is tracked or staged.
 
 ## Engineering architecture
 
@@ -37,7 +71,41 @@ supabase/                    fresh schema, migration, authorization documentatio
 tests/                       Vitest tests for pure helpers
 ```
 
-Public content uses a demo fallback, then `public.site_content(id = 1)`, then selected GitHub metadata enrichment. The admin and private routes remain security-sensitive: application checks do not replace database authorization, and private Storage must remain private.
+Base public content uses a demo fallback, then `public.site_content(id = 1)`, with the pre-Phase-1A GitHub enrichment behavior retained for non-homepage callers. The homepage alone applies selected-GitHub metadata enrichment with a partial/rejected-response fallback that preserves configured project content. A demo biography is not public homepage content; an intro appears there only when the stored content explicitly supplies it. The admin and private routes remain security-sensitive: application checks do not replace database authorization, and private Storage must remain private.
+
+## Phase 1A implementation evidence
+
+This entry records the local homepage implementation and verification completed on 2026-08-15. It is evidence for Work/User review, not phase closure or production authorization.
+
+### Changed
+
+- Reworked the public homepage's hierarchy around the confirmed name and role, a single selected-project destination, an optional decorative project rail, and optional content sections.
+- Prevented unconfirmed or placeholder personal content from rendering on the homepage: the demo email, default demo biography, school/education placeholders, and honor placeholders are filtered and their sections hide when empty. Homepage biography display requires a non-empty intro explicitly supplied by stored content; no replacement or generated copy is used.
+- Limited selected work to three unique project URLs. The decorative rail is `aria-hidden` and non-interactive; sticky project cards remain the sole project-link targets.
+- Made homepage GitHub enrichment resilient to partial and rejected responses while preserving configured project order. The homepage-specific path remains isolated, while `getPublicContent()` now restores its pre-Phase-1A observable behavior for `/admin` and other base-content callers: after a successful content read, non-empty GitHub results replace `projects`; no result keeps the base content.
+- Adjusted responsive Hero positioning, navigation target sizing, focus targets, visual contrast, and reduced-motion behavior. The public homepage no longer links to `/admin`.
+
+### Verified
+
+- `npm test` completed with 7 files and 59 tests passing on 2026-08-15, including regression coverage that the default `demoContent.intro` is not public homepage content, an explicitly confirmed intro is displayed, homepage enrichment preserves configured projects on partial/rejected responses, and base-content enrichment retains the `/admin` behavior described above.
+- `npx tsc --noEmit --incremental false` completed successfully on 2026-08-15.
+- `npm run build` completed successfully on 2026-08-15. The build classified `/` as static with a one-minute revalidation interval.
+- The same build enumerated `/admin` as a static route. Source review confirms `/admin` continues to call `getPublicContent()`; the restored base-content function follows the pre-Phase-1A enrichment branch and is covered by the focused regression test.
+- Independent QA reloaded and inspected the homepage at 1440×1000, 768×1024, and 390×844. It reported no document horizontal overflow, no Hero clipping, unique project links, and no known placeholder content in the rendered page.
+- QA confirmed at least 44px-high navigation and project action targets, visible focus order without duplicate project destinations, no application console errors, and static reduced-motion coverage in CSS and motion components.
+- `git diff --check` completed without whitespace errors. Git emitted CRLF conversion warnings for existing working-copy files.
+
+### Unverified
+
+- Reduced-motion behavior was reviewed from CSS and component logic; no browser session was available to force the operating-system media preference at runtime.
+- No live Supabase or GitHub configuration was used for this local verification. Placeholder filtering and partial/rejected enrichment fallback are covered by focused unit tests, not a provider integration test.
+- Real-device touch and screen-reader testing were not performed.
+
+### Remaining risks
+
+- Public email, biography, education, honors, project media, and any new project claims remain hidden until Work/User confirms them. In particular, the prior record incorrectly implied that the default demo biography was already filtered; bounded rework now enforces that rule. No personal placeholder was replaced with invented content.
+- The Phase 0C-2/0C-3, administrator-identity, provider configuration, private Storage, and release gates remain unresolved and outside Phase 1A.
+- `next build` regenerated `next-env.d.ts`; its pre-existing `.next-dev` references were restored exactly after the final build so the initial working-tree state is retained. A later Next.js build may regenerate this file again.
 
 ## Historical baseline and completed repository evidence
 

@@ -61,6 +61,40 @@ Treat Supabase RLS, Supabase Auth, GitHub OAuth, `ADMIN_EMAILS`, `SUPABASE_SERVI
 - The lead Codex owns final scope control, conflict resolution, diff review, evidence synthesis, and user-facing reporting.
 - Subagents may not expand scope, authorize a later phase, perform unapproved production actions, or close a phase. Phase closure belongs only to Work/User.
 
+## Tool, Skill, and Plugin Usage
+
+Codex may use installed skills, plugins, and specialized tools when they provide real value to the authorized engineering task.
+
+Appropriate usage includes:
+
+- UI/UX work:
+  visual analysis, design comparison, screenshot review, accessibility evaluation.
+
+- Frontend engineering:
+  component analysis, implementation assistance, testing, debugging.
+
+- Repository work:
+  code exploration, dependency analysis, structured review.
+
+- Documentation:
+  consistency checking and evidence organization.
+
+Tool and plugin usage must serve the authorized task and must not become unnecessary process overhead.
+
+Skills, plugins, or external references cannot:
+
+- expand the authorized scope;
+- approve a new phase;
+- replace Work/User product decisions;
+- modify production systems without authorization;
+- replace required verification.
+
+The lead Codex remains responsible for:
+- scope control;
+- final diff review;
+- verification;
+- evidence reporting.
+
 ## Verification and evidence
 
 Choose verification proportionate to the authorized change. For code-affecting work, the baseline commands are:
