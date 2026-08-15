@@ -24,21 +24,22 @@ function MarqueeRow({ projects, direction }: { projects: Project[]; direction: 1
 
   useMotionValueEvent(scrollY, "change", updateOffset);
   useEffect(() => updateOffset(scrollY.get()), [reducedMotion, scrollY]);
-  const source = projects.length ? projects : [{ name: "项目内容将在后台更新", description: "", url: "#", language: "COMING SOON" }];
+  const source = projects;
   const items = [...source, ...source, ...source];
   return <div className="marquee-window" ref={rowRef}><motion.div className="marquee-row" style={{ x }}>
-    {items.map((project, index) => <a className="marquee-card" href={project.url} key={`${project.name}-${index}`} rel="noreferrer" target={project.url === "#" ? undefined : "_blank"}>
+    {items.map((project, index) => <div className="marquee-card" key={`${project.name}-${index}`}>
       <ProjectVisual language={project.language} src={getProjectVisuals(project)[0]} title={project.name} />
       <span>{String((index % source.length) + 1).padStart(2, "0")} / {project.language || "PROJECT"}</span>
-    </a>)}
+    </div>)}
   </motion.div></div>;
 }
 
 export function ProjectMarquee({ projects }: { projects: Project[] }) {
+  if (!projects.length) return null;
   const rowBreak = Math.max(1, Math.ceil(projects.length / 2));
   const first = projects.slice(0, rowBreak);
   const second = projects.slice(rowBreak).length ? projects.slice(rowBreak) : projects;
-  return <section className="selected-work" id="selected-work">
+  return <section aria-hidden="true" className="selected-work" id="selected-work">
     <div className="section-kicker"><span>SELECTED WORK</span><span>SCROLL-DRIVEN ARCHIVE</span></div>
     <MarqueeRow direction={1} projects={first} />
     <MarqueeRow direction={-1} projects={second} />

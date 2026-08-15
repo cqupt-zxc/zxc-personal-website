@@ -14,7 +14,7 @@ export function HonorsRail({ honors }: { honors: Honor[] }) {
   const active = honors[normalizeHonorIndex(index, honors.length)];
   const go = (next: number) => { setDirection(next > index ? 1 : -1); setIndex(normalizeHonorIndex(next, honors.length)); };
 
-  if (!active) return <section className="honors-section" id="honors"><div className="honors-heading"><span>HONORS</span><h2>阶段性收获</h2></div><p className="honors-empty">荣誉与证书将在管理后台更新。</p></section>;
+  if (!active) return null;
   return <section className="honors-section" id="honors" onPointerDown={(event) => { pointerStart.current = event.clientX; }} onPointerUp={(event) => { if (pointerStart.current === null) return; const delta = event.clientX - pointerStart.current; if (Math.abs(delta) > 45) go(index + (delta < 0 ? 1 : -1)); pointerStart.current = null; }} onWheel={(event) => { if (Math.abs(event.deltaY) > 24) go(index + (event.deltaY > 0 ? 1 : -1)); }}>
     <div className="honors-heading"><span>HONORS &amp; CERTIFICATES</span><h2>阶段性收获</h2><p>奖项、证书与被认真记住的投入，不需要占满一整页。</p></div>
     <div className="honor-stage">
